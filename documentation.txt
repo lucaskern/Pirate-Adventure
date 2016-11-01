@@ -1,0 +1,17 @@
+To Do/ Questions
+
+COMPLETED
+1. Generate tiles in one section, and draw in another
+    a. call generate once
+    b. call draw every frame
+
+2. Restrict movement to ground tiles and objects
+
+3. Add score counter
+	a. when all treasure is picked up, regenerate level
+
+4. Drill
+	a. allows one stone wall to be hit
+
+5. Enemy
+	b. Simple enemy that moves in a random direction every couple of seconds
