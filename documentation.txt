@@ -5,6 +5,7 @@ COMPLETED
     a. call generate once
     b. call draw every frame
 
+COMPLETED
 2. Restrict movement to ground tiles and objects
 
 3. Add score counter
@@ -15,3 +16,18 @@ COMPLETED
 
 5. Enemy
 	b. Simple enemy that moves in a random direction every couple of seconds
+    
+
+INDEX
+
+BLOCKS
+null - background
+0 - Player
+1 - Normal Block
+2 - Chest
+3 - Enemy
+
+SOUNDS
+0 - move
+1 - cant move
+2 - pickup

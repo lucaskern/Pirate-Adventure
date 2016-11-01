@@ -31,6 +31,10 @@ window.addEventListener("keydown",function(e){
         app.main.generateTiles();
     }
     
+    if(char == "e" || char == "E"){
+        app.main.moveEnemy();
+    }
+    
     if(char == "w" || char == "W"){
         app.main.movePlayer(0);
     } else if(char == "d" || char == "D"){

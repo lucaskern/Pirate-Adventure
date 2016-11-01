@@ -6,9 +6,11 @@ app.main = {
     , HEIGHT: 800
     , canvas: undefined
     , ctx: undefined
+    , frameCounter: 0
     , sound: undefined
     , player: false
     , flipPlayer: false
+    , score: 0
     , pLocX: undefined
     , pLocY: undefined
     , locX: undefined
@@ -21,12 +23,19 @@ app.main = {
         , BOX_COLOR: "lightgreen"
         , BLOCK_NUM: 150
         , GOLD_NUM: 3
+        , ENEMY_NUM: 3
     })
-    , PLAYER: Object.freeze({
+    , PLAYER: {
         HEALTH: 5
-        , SPEED: 1
+        , WALK: 1
+        , DASH: 2
         , SIZE: 5
-    })
+    }
+    , ENEMY: {
+        HEALTH: 3
+        , SPEED: 1
+        , DMG: 1
+    }
     , numBoxes: this.BLOCK_NUM
     , init: function () {
         console.log("app.main.init() called");
@@ -44,6 +53,7 @@ app.main = {
         var player = document.querySelector("#player");
         var playerFlipped = document.querySelector("#playerFlipped");
         var treasure = document.querySelector("#treasure");
+        var enemy = document.querySelector('#enemy');
         this.pLocX = this.TILES.BOX_SIZE / 2;
         this.pLocY = this.TILES.BOX_SIZE / 2;
         this.gridSpace = this.canvas.width / this.TILES.BOX_SIZE;
@@ -53,6 +63,8 @@ app.main = {
         //this.numBoxes = this.TILES.BLOCK_NUM;
         this.generateTiles();
         this.drawTiles();
+        //setInterval(this.moveEnemy, 3000);
+        
         //this.drawPlayer();
         this.update();
     }
@@ -61,7 +73,15 @@ app.main = {
         this.animationID = requestAnimationFrame(this.update.bind(this));
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.drawTiles();
-        //this.drawPlayer();
+        
+        fillText(this.ctx, "Score: " + this.score, 20, 20, "14pt courier", "#ddd");
+        
+        if (this.frameCounter % 300 == 0) 
+        {
+            //this.moveEnemy();
+        }
+        
+        this.frameCounter++;
     }
     , generateTiles: function () {
         this.player = false;
@@ -89,6 +109,13 @@ app.main = {
             this.cells[this.locX][this.locY] = 2;
             //console.log("gold generated");
         }
+        for (var i = 0; i < this.TILES.ENEMY_NUM; i++) {
+            this.locX = Math.floor(getRandom(0, this.gridSpace));
+            this.locY = Math.floor(getRandom(0, this.gridSpace));
+            //console.log(this.locX + "," + this.locY)
+            this.cells[this.locX][this.locY] = 3;
+            //console.log("gold generated");
+        }
         while (this.player == false) {
             this.locX = Math.floor(getRandom(0, this.gridSpace));
             this.locY = Math.floor(getRandom(0, this.gridSpace));
@@ -101,7 +128,7 @@ app.main = {
         }
         for (var i = 0; i < this.gridSpace;) {
             for (var j = 0; j < this.gridSpace;) {
-               // console.log("Cell " + i + "," + j + " = " + this.cells[i][j]);
+                console.log("Cell " + i + "," + j + " = " + this.cells[i][j]);
                 j++;
             }
             i++;
@@ -119,6 +146,10 @@ app.main = {
                     }
                     else if (this.cells[i][j] == 2) {
                         this.ctx.drawImage(treasure, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
+                        // console.log("Gold ran");
+                    }
+                    else if (this.cells[i][j] == 3) {
+                        this.ctx.drawImage(enemy, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
                         // console.log("Gold ran");
                     }
                     else if (this.cells[i][j] == 0) {
@@ -207,8 +238,68 @@ app.main = {
                 j++;
             }
             i++;
-        
+        }
     }
+    , moveEnemy: function () {
+        var moveDir = getRandom(0, 3);
+        for (var i = 0; i < this.gridSpace;) {
+            for (var j = 0; j < this.gridSpace;) {
+                if (this.cells[i][j] == 3) {
+                    if (moveDir == 0) {
+                        if (this.canMove(i, j, moveDir)) {
+                            this.cells[i][j - 1] = 3;
+                            this.cells[i][j] = null;
+                            
+                            console.log("move " + moveDir);
+                            
+                            break;
+                        }
+                        else {}
+                    }
+                    else if (moveDir == 1) {
+                        if (this.canMove(i, j, moveDir)) {
+                            this.cells[i + 1][j] = 3;
+                            this.cells[i][j] = null;
+                            
+                            console.log("move " + moveDir);
+                            
+                            return;
+                        }
+                        else {}
+                    }
+                    else if (moveDir == 2) {
+                        if (this.canMove(i, j, moveDir)) {
+                            this.cells[i][j + 1] = 3;
+                            this.cells[i][j] = null;
+                            this.sound.playEffect(0);
+                            
+                            console.log("move " + moveDir);
+                            
+                            break;
+                        }
+                        else {}
+                    }
+                    else if (moveDir == 3) {
+                        if (this.canMove(i, j, moveDir)) {
+                            this.cells[i - 1][j] = 3;
+                            this.cells[i][j] = null;
+                            this.sound.playEffect(0);
+                            
+                            console.log("move " + moveDir);
+                            
+                            break;
+                        }
+                        else {
+                            
+                        }
+                    }
+                }
+                //console.log("move enemy ran");
+                j++;
+            }
+            i++
+        }
+         console.log("move enemy ran");
     }
     , calculateDeltaTime: function () {
         var now, fps;
@@ -223,6 +314,11 @@ app.main = {
             if (this.cells[i][j - 1] == 1) {
                 return false;
             }
+            else if (this.cells[i][j - 1] == 2) {
+                this.score++;
+                this.sound.playEffect(2);
+                return true;
+            }
             else {
                 return true;
             }
@@ -230,6 +326,11 @@ app.main = {
         else if (dir == 1) {
             if (this.cells[i + 1][j] == 1) {
                 return false;
+            }
+            else if (this.cells[i + 1][j] == 2) {
+                this.score++;
+                this.sound.playEffect(2);
+                return true;
             }
             else {
                 return true;
@@ -239,6 +340,11 @@ app.main = {
             if (this.cells[i][j + 1] == 1) {
                 return false;
             }
+            else if (this.cells[i][j + 1] == 2) {
+                this.score++;
+                this.sound.playEffect(2);
+                return true;
+            }
             else {
                 return true;
             }
@@ -246,6 +352,11 @@ app.main = {
         else if (dir == 3) {
             if (this.cells[i - 1][j] == 1) {
                 return false;
+            }
+            else if (this.cells[i - 1][j] == 2) {
+                this.score++;
+                this.sound.playEffect(2);
+                return true;
             }
             else {
                 return true;

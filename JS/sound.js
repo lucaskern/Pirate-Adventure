@@ -11,12 +11,13 @@ app.sound = (function(){
 	var effectAudio = undefined;
 	var currentEffect = 0;
 	var currentDirection = 1;
-	var effectSounds = ["move.mp3", "blocked.wav"];
+	var effectSounds = ["move.mp3", "blocked.wav", "coin.wav"];
 	
 
 	function init(){
 		bgAudio = document.querySelector("#bgAudio");
-		bgAudio.volume=0.25;
+		bgAudio.volume=0.91;
+       // playBGAudio();
 		effectAudio = document.querySelector("#effectAudio");
 		effectAudio.volume = 0.3;
 	}
