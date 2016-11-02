@@ -11,6 +11,7 @@ app.main = {
     , player: false
     , flipPlayer: false
     , score: 0
+    , health: undefined
     , pLocX: undefined
     , pLocY: undefined
     , locX: undefined
@@ -26,7 +27,7 @@ app.main = {
         , ENEMY_NUM: 3
     })
     , PLAYER: {
-        HEALTH: 5
+        HEALTH: 3
         , WALK: 1
         , DASH: 2
         , SIZE: 5
@@ -54,6 +55,9 @@ app.main = {
         var playerFlipped = document.querySelector("#playerFlipped");
         var treasure = document.querySelector("#treasure");
         var enemy = document.querySelector('#enemy');
+        
+        this.health = this.PLAYER.HEALTH;
+        
         this.pLocX = this.TILES.BOX_SIZE / 2;
         this.pLocY = this.TILES.BOX_SIZE / 2;
         this.gridSpace = this.canvas.width / this.TILES.BOX_SIZE;
@@ -75,10 +79,11 @@ app.main = {
         this.drawTiles();
         
         fillText(this.ctx, "Score: " + this.score, 20, 20, "14pt courier", "#ddd");
+        fillText(this.ctx, "Health: " + this.health, 20, 50, "14pt courier", "#ddd");
         
-        if (this.frameCounter % 300 == 0) 
+        if (this.frameCounter % 50 == 0) 
         {
-            //this.moveEnemy();
+            this.moveEnemy();
         }
         
         this.frameCounter++;
@@ -241,16 +246,15 @@ app.main = {
         }
     }
     , moveEnemy: function () {
-        var moveDir = getRandom(0, 3);
         for (var i = 0; i < this.gridSpace;) {
             for (var j = 0; j < this.gridSpace;) {
+                var moveDir = Math.floor(getRandom(0, 4));
+                //console.log(moveDir);
                 if (this.cells[i][j] == 3) {
                     if (moveDir == 0) {
                         if (this.canMove(i, j, moveDir)) {
                             this.cells[i][j - 1] = 3;
                             this.cells[i][j] = null;
-                            
-                            console.log("move " + moveDir);
                             
                             break;
                         }
@@ -261,8 +265,6 @@ app.main = {
                             this.cells[i + 1][j] = 3;
                             this.cells[i][j] = null;
                             
-                            console.log("move " + moveDir);
-                            
                             return;
                         }
                         else {}
@@ -271,9 +273,6 @@ app.main = {
                         if (this.canMove(i, j, moveDir)) {
                             this.cells[i][j + 1] = 3;
                             this.cells[i][j] = null;
-                            this.sound.playEffect(0);
-                            
-                            console.log("move " + moveDir);
                             
                             break;
                         }
@@ -283,15 +282,10 @@ app.main = {
                         if (this.canMove(i, j, moveDir)) {
                             this.cells[i - 1][j] = 3;
                             this.cells[i][j] = null;
-                            this.sound.playEffect(0);
-                            
-                            console.log("move " + moveDir);
                             
                             break;
                         }
-                        else {
-                            
-                        }
+                        else {}
                     }
                 }
                 //console.log("move enemy ran");
@@ -299,7 +293,6 @@ app.main = {
             }
             i++
         }
-         console.log("move enemy ran");
     }
     , calculateDeltaTime: function () {
         var now, fps;
