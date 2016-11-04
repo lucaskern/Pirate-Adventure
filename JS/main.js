@@ -17,6 +17,7 @@ app.main = {
     , locX: undefined
     , loxY: undefined
     , gridSpace: undefined
+    , spawnSpace: undefined
     , cells: []
     , TILES: Object.freeze({
         NUM_BOXES: 10
@@ -49,6 +50,7 @@ app.main = {
         this.bgAudio.volume = 0.25;
         this.effectAudio = document.querySelector("#effectAudio");
         this.effectAudio.volume = 0.3;
+        var metal = document.querySelector("#metal");
         var stone = document.querySelector("#stone");
         var stoneBG = document.querySelector("#stoneBG");
         var player = document.querySelector("#player");
@@ -61,6 +63,7 @@ app.main = {
         this.pLocX = this.TILES.BOX_SIZE / 2;
         this.pLocY = this.TILES.BOX_SIZE / 2;
         this.gridSpace = this.canvas.width / this.TILES.BOX_SIZE;
+        this.spawnSpace = this.gridSpace - 1;
         for (var i = 0; i < this.gridSpace; i++) {
             this.cells[i] = [];
         }
@@ -101,38 +104,43 @@ app.main = {
             }
             i++;
         }
+        
+        //set bounds
+        for (var i = 0; i < this.gridSpace; i++) {
+            this.cells[0][i] = 99;
+            this.cells[i][0] = 99;
+            this.cells[this.gridSpace - 1][i] = 99;
+            this.cells[i][this.gridSpace - 1] = 99;
+        }
+        
         //assign block tiles
         for (var i = 0; i < this.TILES.BLOCK_NUM; i++) {
-            this.locX = Math.floor(getRandom(0, this.gridSpace));
-            this.locY = Math.floor(getRandom(0, this.gridSpace));
+            this.locX = Math.floor(getRandom(1, this.spawnSpace));
+            this.locY = Math.floor(getRandom(1, this.spawnSpace));
             this.cells[this.locX][this.locY] = 1;
         }
         for (var i = 0; i < this.TILES.GOLD_NUM; i++) {
-            this.locX = Math.floor(getRandom(0, this.gridSpace));
-            this.locY = Math.floor(getRandom(0, this.gridSpace));
-            //console.log(this.locX + "," + this.locY)
+            this.locX = Math.floor(getRandom(1, this.spawnSpace));
+            this.locY = Math.floor(getRandom(1, this.spawnSpace));
             this.cells[this.locX][this.locY] = 2;
-            //console.log("gold generated");
         }
         for (var i = 0; i < this.TILES.ENEMY_NUM; i++) {
-            this.locX = Math.floor(getRandom(0, this.gridSpace));
-            this.locY = Math.floor(getRandom(0, this.gridSpace));
-            //console.log(this.locX + "," + this.locY)
+            this.locX = Math.floor(getRandom(1, this.spawnSpace));
+            this.locY = Math.floor(getRandom(1, this.spawnSpace));
             this.cells[this.locX][this.locY] = 3;
-            //console.log("gold generated");
         }
         while (this.player == false) {
-            this.locX = Math.floor(getRandom(0, this.gridSpace));
-            this.locY = Math.floor(getRandom(0, this.gridSpace));
+            this.locX = Math.floor(getRandom(1, this.spawnSpace));
+            this.locY = Math.floor(getRandom(1, this.spawnSpace));
             if (this.cells[this.locX][this.locY] == null) {
                 this.player = true;
                 this.cells[this.locX][this.locY] = 0;
-                //console.log(this.locX + "," + this.locY + " IS 0 awjh dka hwih dioaih hido iwdh");
             }
             console.log("player check ran");
         }
-        for (var i = 0; i < this.gridSpace;) {
-            for (var j = 0; j < this.gridSpace;) {
+        
+        for (var i = 0; i < this.spawnSpace;) {
+            for (var j = 0; j < this.spawnSpace;) {
                 console.log("Cell " + i + "," + j + " = " + this.cells[i][j]);
                 j++;
             }
@@ -145,7 +153,10 @@ app.main = {
             for (var i = 0; i < this.gridSpace;) {
                 for (var j = 0; j < this.gridSpace;) {
                     this.ctx.drawImage(stoneBG, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
-                    if (this.cells[i][j] == 1) {
+                    if (this.cells[i][j] == 99) {
+                        this.ctx.drawImage(metal, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
+                        //console.log(i + ',' + j);
+                    } else if (this.cells[i][j] == 1) {
                         this.ctx.drawImage(stone, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
                         //console.log(i + ',' + j);
                     }
@@ -171,22 +182,10 @@ app.main = {
                 }
                 i++;
             }
-        }
-        /*, drawPlayer: function () {
-            this.ctx.save();
-            this.ctx.fillStyle = "red";
-            this.ctx.beginPath();
-            this.ctx.arc(this.pLocX, this.pLocY, this.PLAYER.SIZE, 0, Math.PI * 2, false);
-            this.ctx.closePath();
-            //this.ctx.fill();
-            this.ctx.restore();
-            
-            this.ctx.drawImage(player, this.pLocX - (this.TILES.BOX_SIZE / 2), this.pLocY - (this.TILES.BOX_SIZE / 2), this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
-        }*/
-        
+        } 
     , movePlayer: function (dir) {
-        for (var i = 0; i < this.gridSpace;) {
-            for (var j = 0; j < this.gridSpace;) {
+        for (var i = 1; i < this.spawnSpace;) {
+            for (var j = 1; j < this.spawnSpace;) {
                 if (this.cells[i][j] == 0) {
                     if (dir == 0) {
                         if (this.canMove(i, j, dir)) {
@@ -246,8 +245,8 @@ app.main = {
         }
     }
     , moveEnemy: function () {
-        for (var i = 0; i < this.gridSpace;) {
-            for (var j = 0; j < this.gridSpace;) {
+        for (var i = 1; i < this.spawnSpace;) {
+            for (var j = 1; j < this.spawnSpace;) {
                 var moveDir = Math.floor(getRandom(0, 4));
                 //console.log(moveDir);
                 if (this.cells[i][j] == 3) {
@@ -304,7 +303,7 @@ app.main = {
     }
     , canMove: function (i, j, dir) {
         if (dir == 0) {
-            if (this.cells[i][j - 1] == 1) {
+            if (this.cells[i][j - 1] == 1 || this.cells[i][j - 1] == 99) {
                 return false;
             }
             else if (this.cells[i][j - 1] == 2) {
@@ -317,7 +316,7 @@ app.main = {
             }
         }
         else if (dir == 1) {
-            if (this.cells[i + 1][j] == 1) {
+            if (this.cells[i + 1][j] == 1 || this.cells[i + 1][j] == 99) {
                 return false;
             }
             else if (this.cells[i + 1][j] == 2) {
@@ -330,7 +329,7 @@ app.main = {
             }
         }
         else if (dir == 2) {
-            if (this.cells[i][j + 1] == 1) {
+            if (this.cells[i][j + 1] == 1 ||this.cells[i][j + 1] == 99) {
                 return false;
             }
             else if (this.cells[i][j + 1] == 2) {
@@ -343,7 +342,7 @@ app.main = {
             }
         }
         else if (dir == 3) {
-            if (this.cells[i - 1][j] == 1) {
+            if (this.cells[i - 1][j] == 1 || this.cells[i - 1][j] == 99) {
                 return false;
             }
             else if (this.cells[i - 1][j] == 2) {
