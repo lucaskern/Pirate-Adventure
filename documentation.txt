@@ -23,6 +23,8 @@ COMPLETED
 6. Return an array of values from can move, that includes true or false, and the block to be hit
     a. execute proper actions when certain blocks hit
     
+7. Show where enemy is going to move
+    
 
 INDEX
 

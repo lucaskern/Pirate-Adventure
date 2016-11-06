@@ -38,7 +38,7 @@ window.addEventListener("keydown",function(e){
     }
     
     if(char == "e" || char == "E"){
-        app.main.moveEnemy();
+        app.main.enterDungeon();
     }
     
     if(char == "f" || char == "F"){
