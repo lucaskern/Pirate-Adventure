@@ -8,14 +8,20 @@ COMPLETED
 COMPLETED
 2. Restrict movement to ground tiles and objects
 
+
 3. Add score counter
 	a. when all treasure is picked up, regenerate level
 
 4. Drill
 	a. allows one stone wall to be hit
 
+
+//COMPLETED
 5. Enemy
-	b. Simple enemy that moves in a random direction every couple of seconds
+	a. Simple enemy that moves in a random direction every couple of seconds
+    
+6. Return an array of values from can move, that includes true or false, and the block to be hit
+    a. execute proper actions when certain blocks hit
     
 
 INDEX

@@ -11,7 +11,7 @@ app.sound = (function(){
 	var effectAudio = undefined;
 	var currentEffect = 0;
 	var currentDirection = 1;
-	var effectSounds = ["move.mp3", "blocked.wav", "coin.wav"];
+	var effectSounds = ["move.mp3", "blocked.wav", "coin.wav", "attack.wav"];
 	
 
 	function init(){

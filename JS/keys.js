@@ -27,6 +27,12 @@ window.addEventListener("keydown",function(e){
     
     var char = String.fromCharCode(e.keyCode);
     
+    if(e.keyCode == 32 && e.target == document.body) {
+        e.preventDefault();
+        app.main.attackBlock();
+        return false;
+    }
+    
     if(char == "t" || char == "T"){
         app.main.generateTiles();
     }
@@ -35,14 +41,22 @@ window.addEventListener("keydown",function(e){
         app.main.moveEnemy();
     }
     
+    if(char == "f" || char == "F"){
+        app.main.damage();
+    }
+    
     if(char == "w" || char == "W"){
         app.main.movePlayer(0);
+        app.main.flipPlayerSprite(0);
     } else if(char == "d" || char == "D"){
         app.main.movePlayer(1);
+        app.main.flipPlayerSprite(1);
     } else if(char == "s" || char == "S"){
         app.main.movePlayer(2);
+        app.main.flipPlayerSprite(2);
     } else if(char == "a" || char == "A"){
         app.main.movePlayer(3);
+        app.main.flipPlayerSprite(3);
     }
 });
 	

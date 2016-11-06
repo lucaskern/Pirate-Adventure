@@ -9,7 +9,7 @@ app.main = {
     , frameCounter: 0
     , sound: undefined
     , player: false
-    , flipPlayer: false
+    , playerDirection: 0
     , score: 0
     , health: undefined
     , pLocX: undefined
@@ -20,10 +20,9 @@ app.main = {
     , spawnSpace: undefined
     , cells: []
     , TILES: Object.freeze({
-        NUM_BOXES: 10
-        , BOX_SIZE: 40
+        BOX_SIZE: 50
         , BOX_COLOR: "lightgreen"
-        , BLOCK_NUM: 150
+        , BLOCK_NUM: 80
         , GOLD_NUM: 3
         , ENEMY_NUM: 3
     })
@@ -50,16 +49,14 @@ app.main = {
         this.bgAudio.volume = 0.25;
         this.effectAudio = document.querySelector("#effectAudio");
         this.effectAudio.volume = 0.3;
-        var metal = document.querySelector("#metal");
+        var border = document.querySelector("#border");
         var stone = document.querySelector("#stone");
         var stoneBG = document.querySelector("#stoneBG");
-        var player = document.querySelector("#player");
-        var playerFlipped = document.querySelector("#playerFlipped");
+        console.log(stoneBG);
+        var playerUp = document.querySelector("#playerUp");
         var treasure = document.querySelector("#treasure");
         var enemy = document.querySelector('#enemy');
-        
         this.health = this.PLAYER.HEALTH;
-        
         this.pLocX = this.TILES.BOX_SIZE / 2;
         this.pLocY = this.TILES.BOX_SIZE / 2;
         this.gridSpace = this.canvas.width / this.TILES.BOX_SIZE;
@@ -71,7 +68,6 @@ app.main = {
         this.generateTiles();
         this.drawTiles();
         //setInterval(this.moveEnemy, 3000);
-        
         //this.drawPlayer();
         this.update();
     }
@@ -80,15 +76,11 @@ app.main = {
         this.animationID = requestAnimationFrame(this.update.bind(this));
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.drawTiles();
-        
-        fillText(this.ctx, "Score: " + this.score, 20, 20, "14pt courier", "#ddd");
-        fillText(this.ctx, "Health: " + this.health, 20, 50, "14pt courier", "#ddd");
-        
-        if (this.frameCounter % 50 == 0) 
-        {
+        fillText(this.ctx, "Score: " + this.score, 20, this.canvas.height - 15, "24pt  verdana", "#F00");
+        fillText(this.ctx, "Health: " + this.health, this.canvas.width - 200, this.canvas.height - 15, "24pt verdana", "#F00");
+        if (this.frameCounter % 50 == 0) {
             this.moveEnemy();
         }
-        
         this.frameCounter++;
     }
     , generateTiles: function () {
@@ -104,7 +96,6 @@ app.main = {
             }
             i++;
         }
-        
         //set bounds
         for (var i = 0; i < this.gridSpace; i++) {
             this.cells[0][i] = 99;
@@ -112,7 +103,6 @@ app.main = {
             this.cells[this.gridSpace - 1][i] = 99;
             this.cells[i][this.gridSpace - 1] = 99;
         }
-        
         //assign block tiles
         for (var i = 0; i < this.TILES.BLOCK_NUM; i++) {
             this.locX = Math.floor(getRandom(1, this.spawnSpace));
@@ -125,8 +115,16 @@ app.main = {
             this.cells[this.locX][this.locY] = 2;
         }
         for (var i = 0; i < this.TILES.ENEMY_NUM; i++) {
+            //var e = {};
+            
             this.locX = Math.floor(getRandom(1, this.spawnSpace));
             this.locY = Math.floor(getRandom(1, this.spawnSpace));
+            
+            /*e.locX = this.locX;
+            e.locY = this.locY;
+            
+            e.health = this.ENEMY.HEALTH;*/
+            
             this.cells[this.locX][this.locY] = 3;
         }
         while (this.player == false) {
@@ -138,55 +136,73 @@ app.main = {
             }
             console.log("player check ran");
         }
-        
         for (var i = 0; i < this.spawnSpace;) {
             for (var j = 0; j < this.spawnSpace;) {
-                console.log("Cell " + i + "," + j + " = " + this.cells[i][j]);
+                //console.log("Cell " + i + "," + j + " = " + this.cells[i][j]);
                 j++;
             }
             i++;
         }
     }
     , drawTiles: function () {
-            //this.gridSpace = this.canvas.width / this.TILES.BOX_SIZE;
-            //var cellNum = this.gridSpace * this.gridSpace;
-            for (var i = 0; i < this.gridSpace;) {
-                for (var j = 0; j < this.gridSpace;) {
-                    this.ctx.drawImage(stoneBG, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
-                    if (this.cells[i][j] == 99) {
-                        this.ctx.drawImage(metal, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
-                        //console.log(i + ',' + j);
-                    } else if (this.cells[i][j] == 1) {
-                        this.ctx.drawImage(stone, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
-                        //console.log(i + ',' + j);
-                    }
-                    else if (this.cells[i][j] == 2) {
-                        this.ctx.drawImage(treasure, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
-                        // console.log("Gold ran");
-                    }
-                    else if (this.cells[i][j] == 3) {
-                        this.ctx.drawImage(enemy, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
-                        // console.log("Gold ran");
-                    }
-                    else if (this.cells[i][j] == 0) {
-                        this.pLocX = i;
-                        this.pLocY = j;
-                        if (this.flipPlayer) {
-                            this.ctx.drawImage(playerFlipped, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
-                        }
-                        else {
-                            this.ctx.drawImage(player, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
-                        }
-                    }
-                    j++;
+        //this.gridSpace = this.canvas.width / this.TILES.BOX_SIZE;
+        //var cellNum = this.gridSpace * this.gridSpace;
+        for (var i = 0; i < this.gridSpace;) {
+            for (var j = 0; j < this.gridSpace;) {
+                this.ctx.drawImage(stoneBG, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
+                if (this.cells[i][j] == 99) {
+                    this.ctx.drawImage(border, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
+                    //console.log(i + ',' + j);
                 }
-                i++;
+                else if (this.cells[i][j] == 1) {
+                    this.ctx.drawImage(stone, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
+                    //console.log(i + ',' + j);
+                }
+                else if (this.cells[i][j] == 2) {
+                    this.ctx.drawImage(treasure, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
+                    // console.log("Gold ran");
+                }
+                else if (this.cells[i][j] == 3) {
+                    this.ctx.drawImage(enemy, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
+                    // console.log("Gold ran");
+                }
+                else if (this.cells[i][j] == 0) {
+                    this.pLocX = i;
+                    this.pLocY = j;
+                    //console.log(player);
+                    switch (this.playerDirection) {
+                    case 0:
+                        this.ctx.drawImage(playerUp, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
+                        break;
+                    case 1:
+                        this.ctx.drawImage(playerRight, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
+                        break;
+                    case 2:
+                        this.ctx.drawImage(playerDown, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
+                        break;
+                    case 3:
+                        this.ctx.drawImage(playerLeft, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
+                        break;
+                    }
+                    
+                    //console.log(this.playerDirection);
+                    /*if (this.flipPlayer) {
+                        this.ctx.drawImage(playerFlipped, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
+                    }
+                    else {
+                        this.ctx.drawImage(player, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
+                    }*/
+                }
+                j++;
             }
-        } 
+            i++;
+        }
+    }
     , movePlayer: function (dir) {
+        var moveParameters = [];
         for (var i = 1; i < this.spawnSpace;) {
             for (var j = 1; j < this.spawnSpace;) {
-                if (this.cells[i][j] == 0) {
+                /*if (this.cells[i][j] == 0) {
                     if (dir == 0) {
                         if (this.canMove(i, j, dir)) {
                             this.cells[i][j - 1] = 0;
@@ -238,6 +254,11 @@ app.main = {
                             this.sound.playEffect(1);
                         }
                     }
+                }*/
+                if (this.cells[i][j] == 0) {
+                    moveParameters = this.canMove(i, j, dir);
+                    this.executeMove(i, j, dir, moveParameters);
+                    return;
                 }
                 j++;
             }
@@ -245,66 +266,82 @@ app.main = {
         }
     }
     , moveEnemy: function () {
+        var moveParameters = [];
         for (var i = 1; i < this.spawnSpace;) {
             for (var j = 1; j < this.spawnSpace;) {
                 var moveDir = Math.floor(getRandom(0, 4));
-                //console.log(moveDir);
+                
                 if (this.cells[i][j] == 3) {
-                    if (moveDir == 0) {
-                        if (this.canMove(i, j, moveDir)) {
-                            this.cells[i][j - 1] = 3;
-                            this.cells[i][j] = null;
-                            
-                            break;
-                        }
-                        else {}
-                    }
-                    else if (moveDir == 1) {
-                        if (this.canMove(i, j, moveDir)) {
-                            this.cells[i + 1][j] = 3;
-                            this.cells[i][j] = null;
-                            
-                            return;
-                        }
-                        else {}
-                    }
-                    else if (moveDir == 2) {
-                        if (this.canMove(i, j, moveDir)) {
-                            this.cells[i][j + 1] = 3;
-                            this.cells[i][j] = null;
-                            
-                            break;
-                        }
-                        else {}
-                    }
-                    else if (moveDir == 3) {
-                        if (this.canMove(i, j, moveDir)) {
-                            this.cells[i - 1][j] = 3;
-                            this.cells[i][j] = null;
-                            
-                            break;
-                        }
-                        else {}
-                    }
-                }
-                //console.log("move enemy ran");
+                    moveParameters = this.canMove(i, j, moveDir);
+                    this.executeMove(i, j, moveDir, moveParameters);
+                    break;
+                }   
                 j++;
             }
             i++
         }
     }
-    , calculateDeltaTime: function () {
-        var now, fps;
-        now = performance.now();
-        fps = 1000 / (now - this.lastTime);
-        fps = clamp(fps, 12, 60);
-        this.lastTime = now;
-        return 1 / fps;
-    }
     , canMove: function (i, j, dir) {
-        if (dir == 0) {
-            if (this.cells[i][j - 1] == 1 || this.cells[i][j - 1] == 99) {
-                return false;
+        var moveData = [];
+        var movingBlock = this.cells[i][j];
+        var hitBlock;
+        switch (dir) {
+        case 0:
+            hitBlock = this.cells[i][j - 1];
+            break;
+        case 1:
+            hitBlock = this.cells[i + 1][j];
+            break;
+        case 2:
+            hitBlock = this.cells[i][j + 1];
+            break;
+        case 3:
+            hitBlock = this.cells[i - 1][j];
+            break;
+        }
+        switch (movingBlock) {
+        case 0:
+            moveData[1] = "player";
+            break;
+        case 1:
+            moveData[1] = "block";
+            break;
+        case 2:
+            moveData[1] = "gold";
+            break;
+        case 3:
+            moveData[1] = "enemy";
+            break;
+        case 99:
+            moveData[1] = "border";
+            break;
+        }
+        switch (hitBlock) {
+        case 0:
+            moveData[2] = "player";
+            break;
+        case 1:
+            moveData[2] = "block";
+            break;
+        case 2:
+            moveData[2] = "gold";
+            break;
+        case 3:
+            moveData[2] = "enemy";
+            break;
+        case 99:
+            moveData[2] = "border";
+            break;
+        case null:
+            moveData[2] = "empty";
+        }
+        //console.log(moveData)
+        return moveData;
+        /*if (dir == 0) {
+            if (this.cells[i][j - 1] == 1 || this.cells[i][j - 1] == 99 || this.cells[i][j - 1] == 0 || this.cells[i][j - 1] == 3) {
+                moveData[0] = false;
+                moveData[1] =
+                    return false;
             }
             else if (this.cells[i][j - 1] == 2) {
                 this.score++;
@@ -316,7 +353,7 @@ app.main = {
             }
         }
         else if (dir == 1) {
-            if (this.cells[i + 1][j] == 1 || this.cells[i + 1][j] == 99) {
+            if (this.cells[i + 1][j] == 1 || this.cells[i + 1][j] == 99 || this.cells[i + 1][j] == 3 || this.cells[i + 1][j] == 0) {
                 return false;
             }
             else if (this.cells[i + 1][j] == 2) {
@@ -329,7 +366,7 @@ app.main = {
             }
         }
         else if (dir == 2) {
-            if (this.cells[i][j + 1] == 1 ||this.cells[i][j + 1] == 99) {
+            if (this.cells[i][j + 1] == 1 || this.cells[i][j + 1] == 99 || this.cells[i][j + 1] == 3 || this.cells[i][j + 1] == 0) {
                 return false;
             }
             else if (this.cells[i][j + 1] == 2) {
@@ -342,7 +379,7 @@ app.main = {
             }
         }
         else if (dir == 3) {
-            if (this.cells[i - 1][j] == 1 || this.cells[i - 1][j] == 99) {
+            if (this.cells[i - 1][j] == 1 || this.cells[i - 1][j] == 99 || this.cells[i - 1][j] == 3 || this.cells[i - 1][j] == 0) {
                 return false;
             }
             else if (this.cells[i - 1][j] == 2) {
@@ -353,7 +390,145 @@ app.main = {
             else {
                 return true;
             }
+        }*/
+    }
+    , executeMove: function (i, j, dir, moveData) {
+        console.log(moveData);
+        //Player movement rules
+        if (moveData[1] == "player" && moveData[2] == "empty") {
+            switch (dir) {
+            case 0:
+                this.cells[i][j] = null;
+                this.cells[i][j - 1] = 0;
+                break;
+            case 1:
+                this.cells[i][j] = null;
+                this.cells[i + 1][j] = 0;
+                break;
+            case 2:
+                this.cells[i][j] = null;
+                this.cells[i][j + 1] = 0;
+                break;
+            case 3:
+                this.cells[i][j] = null;
+                this.cells[i - 1][j] = 0;
+                break;
+            }
+            this.sound.playEffect(0);
         }
+        else if (moveData[1] == "player" && moveData[2] == "block") {
+            this.sound.playEffect(1);
+        }
+        else if (moveData[1] == "player" && moveData[2] == "gold") {
+            switch (dir) {
+            case 0:
+                this.cells[i][j] = null;
+                this.cells[i][j - 1] = 0;
+                break;
+            case 1:
+                this.cells[i][j] = null;
+                this.cells[i + 1][j] = 0;
+                break;
+            case 2:
+                this.cells[i][j] = null;
+                this.cells[i][j + 1] = 0;
+                break;
+            case 3:
+                this.cells[i][j] = null;
+                this.cells[i - 1][j] = 0;
+                break;
+            }
+            this.score++;
+            this.sound.playEffect(2);
+        }
+        
+        if (moveData[1] == "enemy" && moveData[2] == "empty") {
+            switch (dir) {
+            case 0:
+                this.cells[i][j] = null;
+                this.cells[i][j - 1] = 3;
+                break;
+            case 1:
+                this.cells[i][j] = null;
+                this.cells[i + 1][j] = 3;
+                break;
+            case 2:
+                this.cells[i][j] = null;
+                this.cells[i][j + 1] = 3;
+                break;
+            case 3:
+                this.cells[i][j] = null;
+                this.cells[i - 1][j] = 3;
+                break;
+            }
+        } else if (moveData[1] == "enemy" && moveData[2] == "player") {
+            this.health--;
+        }
+    }
+    , attackBlock: function () {
+        console.log("attack ran");
+        var attackParameters = [];
+        for (var i = 1; i < this.spawnSpace;) {
+            for (var j = 1; j < this.spawnSpace;) {
+                if (this.cells[i][j] == 0) {
+                    switch(this.playerDirection) {
+                        case 0:
+                            if(this.cells[i][j - 1] == 3){
+                                this.cells[i][j - 1] = null;
+                                this.sound.playEffect(3);
+                            } else if(this.cells[i][j - 1] == 0){
+                                this.health--;
+                            }
+                            break;
+                        case 1:
+                            if(this.cells[i + 1][j] == 3){
+                                this.cells[i + 1][j] = null;
+                                this.sound.playEffect(3);
+                            } else if(this.cells[i + 1][j] == 0){
+                                this.health--;
+                            }
+                            break;
+                        case 2:
+                            if(this.cells[i][j + 1] == 3){
+                                this.cells[i][j + 1] = null;
+                                this.sound.playEffect(3);
+                            } else if(this.cells[i][j + 1] == 0){
+                                this.health--;
+                            }
+                            break;
+                        case 3:
+                            if(this.cells[i - 1][j] == 3){
+                                this.cells[i - 1][j] = null;
+                                this.sound.playEffect(3);
+                            } else if(this.cells[i - 1][j] == 0){
+                                this.health--;
+                            }
+                            break;
+                    }
+                    return;
+                }
+                j++;
+            }
+            i++;
+        }
+    }
+    , executeAttack: function (block) {
+        
+    }
+    , flipPlayerSprite: function (dir) {
+        //console.log(player);
+        this.playerDirection = dir;
+    }
+    , damage: function () {
+        this.health--;
+    }
+    , calculateDeltaTime: function () {
+        var now, fps;
+        now = performance.now();
+        fps = 1000 / (now - this.lastTime);
+        fps = clamp(fps, 12, 60);
+        this.lastTime = now;
+        return 1 / fps;
     }
     , sprite: function (options) {
         var that = {}
