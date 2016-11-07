@@ -7,6 +7,7 @@ app.main = {
     , canvas: undefined
     , ctx: undefined
     , frameCounter: 0
+    , blinkCount: 0
     , sound: undefined
     , player: false
     , playerDirection: 0
@@ -36,7 +37,7 @@ app.main = {
         , ENEMY_NUM: 3
     })
     , PLAYER: {
-        HEALTH: 3
+        HEALTH: 1
         , WALK: 1
         , DASH: 2
         , SIZE: 5
@@ -83,7 +84,7 @@ app.main = {
             this.cells[i] = [];
             this.overworld[i] = [];
         }
-        this.GAMESTATE = this.GAMESTATE.OVERWORLD;
+        this.GAMESTATE = 0;
         console.log(this.GAMESTATE);
         //this.numBoxes = this.TILES.BLOCK_NUM;
         this.generateOverworld();
@@ -95,13 +96,28 @@ app.main = {
         // schedule a call to update()
         this.animationID = requestAnimationFrame(this.update.bind(this));
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.drawTiles();
-        fillText(this.ctx, "Score: " + this.score, 20, this.canvas.height - 15, "24pt  verdana", "#F00");
-        fillText(this.ctx, "Health: " + this.health, this.canvas.width - 200, this.canvas.height - 15, "24pt verdana", "#F00");
-        if (this.frameCounter % 50 == 0) {
-            this.moveEnemy();
+        
+        if (this.GAMESTATE == 0) {
+            this.titleScreen();
+        } else if (this.GAMESTATE == 4) {
+            this.gameOver();
         }
-        this.frameCounter++;
+        else if (this.GAMESTATE == 1, 2) {
+            this.drawTiles();
+            fillText(this.ctx, "Score: " + this.score, 20, this.canvas.height - 15, "24pt  verdana", "#F00");
+            fillText(this.ctx, "Health: " + this.health, this.canvas.width - 200, this.canvas.height - 15, "24pt verdana", "#F00");
+            
+            if (this.frameCounter % 50 == 0) {
+                this.moveEnemy();
+            }
+            
+            this.frameCounter++;
+        } 
+        
+        if (this.health <= 0) {
+            this.die();
+        }
+        
         //console.log(this.GAMESTATE);
     }
     , generateOverworld: function () {
@@ -476,7 +492,10 @@ app.main = {
                     this.cells[i - 1][j] = 0;
                     break;
                 }
-                this.score++;
+                
+                var goldAmount = Math.floor(getRandom(5,16));
+                
+                this.score = this.score + goldAmount;
                 this.sound.playEffect(2);
             }
             if (moveData[1] == "enemy" && moveData[2] == "empty") {
@@ -624,6 +643,61 @@ app.main = {
     }
     , damage: function () {
         this.health--;
+    }
+    , die: function() {
+        this.GAMESTATE = 4;
+    }
+    , titleScreen: function() {
+        var isOn = true;
+        
+        if (this.blinkCount < 60)
+        {
+            isOn = true;
+        }
+        else if(this.blinkCount < 120) 
+        {
+            isOn = false;
+        } else if (this.blinkCount > 120) {
+            this.blinkCount = 0;
+        }
+        
+        this.ctx.save();
+        this.ctx.textAlign = "center";
+        this.ctx.fillStyle = "gold";
+        
+        this.ctx.fillRect(0,0, this.canvas.width, this.canvas.height);
+        fillText(this.ctx, "Pirate Adventure" , this.canvas.width / 2, this.canvas.height / 2, "50pt serif", "black");
+        
+        if(isOn)
+        {
+            fillText(this.ctx, "Press Enter to Begin" , this.canvas.width / 2, this.canvas.height / 1.7, "bold 18pt courier", "black");
+        }
+        
+        this.ctx.restore();
+        
+        this.blinkCount++;
+    }
+    , gameOver: function() {
+        this.ctx.save();
+        this.ctx.textAlign = "center";
+        this.ctx.fillStyle = "red";
+        
+        this.ctx.fillRect(0,0, this.canvas.width, this.canvas.height);
+        fillText(this.ctx, "Thou Art Dead" , this.canvas.width / 2, this.canvas.height / 2.5, "50pt serif", "black");
+        
+        fillText(this.ctx, "You amassed a fortune of " + this.score + " pieces of gold!" , this.canvas.width / 2, this.canvas.height / 2, "bold 18pt courier", "black");
+        
+        fillText(this.ctx, "Press Enter to Restart" , this.canvas.width / 2, this.canvas.height / 1.4, "bold 18pt courier", "black");
+        
+        this.ctx.restore();
+    }
+    , restart: function () {
+        this.score = 0;
+        this.health = this.PLAYER.HEALTH;
+        
+        this.generateOverworld();
+        
+        this.GAMESTATE = 0;
     }
     , calculateDeltaTime: function () {
         var now, fps;

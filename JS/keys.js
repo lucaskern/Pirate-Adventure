@@ -58,6 +58,14 @@ window.addEventListener("keydown",function(e){
         app.main.movePlayer(3);
         app.main.flipPlayerSprite(3);
     }
+    
+    if(e.keyCode == "13" && app.main.GAMESTATE == 0)    
+    {
+        app.main.GAMESTATE = 1;
+    } else if (e.keyCode == "13" && app.main.GAMESTATE == 4)
+    {
+        app.main.restart();
+    }
 });
 	
 window.addEventListener("keyup",function(e){
