@@ -29,11 +29,20 @@ COMPLETED
 INDEX
 
 BLOCKS
+
+Dungeon
 null - background
 0 - Player
 1 - Normal Block
 2 - Chest
 3 - Enemy
+
+OverWorld
+null - water
+0 - player
+1 - land
+2 - dungeon
+5 - closed dungeon
 
 SOUNDS
 0 - move
