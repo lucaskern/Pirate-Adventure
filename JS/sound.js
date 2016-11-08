@@ -12,12 +12,13 @@ app.sound = (function(){
 	var currentEffect = 0;
 	var currentDirection = 1;
 	var effectSounds = ["move.mp3", "blocked.wav", "coin.wav", "attack.wav"];
+    var bgSounds = ["bg-loop.wav","overworld-loop.mp3","dungeon-loop.mp3", "dead-loop.mp3"];
 	
 
 	function init(){
 		bgAudio = document.querySelector("#bgAudio");
-		bgAudio.volume=0.91;
-       // playBGAudio();
+		bgAudio.volume = 0.5;
+        playBGAudio(2);
 		effectAudio = document.querySelector("#effectAudio");
 		effectAudio.volume = 0.3;
 	}
@@ -32,7 +33,8 @@ app.sound = (function(){
 		effectAudio.play();
 	}
     
-    function playBGAudio() {
+    function playBGAudio(num) {
+        bgAudio.src = "Sounds/" + bgSounds[num];
         bgAudio.play();
     }
 		

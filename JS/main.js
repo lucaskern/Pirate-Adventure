@@ -12,6 +12,7 @@ app.main = {
     , player: false
     , playerDirection: 0
     , score: 0
+    , alive : true
     , health: undefined
     , pLocX: undefined
     , pLocY: undefined
@@ -622,6 +623,8 @@ app.main = {
     , enterDungeon: function () {
         this.generateDungeon();
         this.GAMESTATE = 2;
+        
+        this.sound.playBGAudio(2);
         console.log("enter dungeon");
     }
     , enterOverworld: function () {
@@ -634,6 +637,8 @@ app.main = {
             i++;
         }
         this.GAMESTATE = 1;
+        
+        this.sound.playBGAudio(1);
         console.log("leave Dungeon");
     }
     , executeAttack: function (block) {}
@@ -696,6 +701,8 @@ app.main = {
         this.health = this.PLAYER.HEALTH;
         
         this.generateOverworld();
+        
+        this.sound.playBGAudio(1);
         
         this.GAMESTATE = 0;
     }

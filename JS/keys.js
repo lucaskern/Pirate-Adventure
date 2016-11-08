@@ -62,6 +62,7 @@ window.addEventListener("keydown",function(e){
     if(e.keyCode == "13" && app.main.GAMESTATE == 0)    
     {
         app.main.GAMESTATE = 1;
+        app.main.sound.playBGAudio(1);
     } else if (e.keyCode == "13" && app.main.GAMESTATE == 4)
     {
         app.main.restart();
