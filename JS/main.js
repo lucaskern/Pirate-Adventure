@@ -23,12 +23,12 @@ app.main = {
     , cells: []
     , overworld: []
     , TILES: Object.freeze({
-        BOX_SIZE: 40
+        BOX_SIZE: 50
     })
     , OVERWORLD_TILES: Object.freeze({
         BG_COLOR: "lightblue"
         , LAND_COLOR: "green"
-        , LAND_NUM: 30
+        , LAND_NUM: 5
         , DUNGEON_NUM: 3
     })
     , DUNGEON_TILES: Object.freeze({
@@ -38,7 +38,7 @@ app.main = {
         , ENEMY_NUM: 3
     })
     , PLAYER: {
-        HEALTH: 1
+        HEALTH: 3
         , WALK: 1
         , DASH: 2
         , SIZE: 5
@@ -85,10 +85,10 @@ app.main = {
             this.cells[i] = [];
             this.overworld[i] = [];
         }
-        this.GAMESTATE = 0;
-        console.log(this.GAMESTATE);
+        this.GAMESTATE = 1;
+        console.log(this.spawnSpace);
         //this.numBoxes = this.TILES.BLOCK_NUM;
-        this.generateOverworld();
+        this.generateOverworld(0, 0);
         //this.generateDungeon();
         this.drawTiles();
         this.update();
@@ -121,8 +121,10 @@ app.main = {
         
         //console.log(this.GAMESTATE);
     }
-    , generateOverworld: function () {
+    , generateOverworld: function (playerX, playerY) {
         this.player = false;
+        
+        
         //clear cells array
         for (var i = 0; i < this.gridSpace;) {
             for (var j = 0; j < this.gridSpace;) {
@@ -139,12 +141,60 @@ app.main = {
             this.cells[this.gridSpace - 1][i] = 99;
             this.cells[i][this.gridSpace - 1] = 99;
         }
-        //assign block tiles
+        
+        //generate islands
         for (var i = 0; i < this.OVERWORLD_TILES.LAND_NUM; i++) {
+            var islandSize = Math.floor(getRandom(7, 15));
+            this.locX = Math.floor(getRandom(1, this.spawnSpace));
+            this.locY = Math.floor(getRandom(1, this.spawnSpace));
+            
+            this.cells[this.locX][this.locY] = 1;
+            
+            for(var j = 0; j < islandSize; j++)
+            {
+                var direction = Math.floor(getRandom(0,4));
+                
+                switch(direction) {
+                    case 0:
+                    if(this.cells[this.locX][this.locY - 1] == null){
+                        this.cells[this.locX][this.locY -1] = 1;
+                        console.log("locX: " + this.locX + " locY: " + this.locY);
+                        
+                    }
+                    break;
+                        case 1:
+                    if(this.cells[this.locX + 1][this.locY] == null){
+                        this.cells[this.locX + 1][this.locY] = 1;
+                        console.log("locX: " + this.locX + " locY: " + this.locY);
+                       
+                    }
+                    break;
+                        case 2:
+                    if(this.cells[this.locX][this.locY + 1] == null){
+                        this.cells[this.locX][this.locY + 1] = 1;
+                        console.log("locX: " + this.locX + " locY: " + this.locY);
+                       
+                    }
+                    break;
+                        case 3:
+                    if(this.cells[this.locX - 1][this.locY] == null){
+                        this.cells[this.locX - 1][this.locY] = 1;
+                        console.log("locX: " + this.locX + " locY: " + this.locY);
+                        
+                    }
+                    break;
+                }
+            }
+            
+        }
+        
+        //assign block tiles
+        /*for (var i = 0; i < this.OVERWORLD_TILES.LAND_NUM; i++) {
             this.locX = Math.floor(getRandom(1, this.spawnSpace));
             this.locY = Math.floor(getRandom(1, this.spawnSpace));
             this.cells[this.locX][this.locY] = 1;
-        }
+        }*/
+        
         for (var i = 0; i < this.OVERWORLD_TILES.DUNGEON_NUM; i++) {
             this.locX = Math.floor(getRandom(1, this.spawnSpace));
             this.locY = Math.floor(getRandom(1, this.spawnSpace));
@@ -152,15 +202,32 @@ app.main = {
                 this.cells[this.locX][this.locY] = 2;
             }
         }
+        
         while (this.player == false) {
             this.locX = Math.floor(getRandom(1, this.spawnSpace));
             this.locY = Math.floor(getRandom(1, this.spawnSpace));
+            
+            if(playerX == this.spawnSpace - 1) {
+                this.locX = 1;
+                this.locY = playerY;
+            } else if (playerY == this.spawnSpace - 1) {
+                this.locY = 1;
+                this.locX = playerX;
+            } else if(playerX == 1) {
+                this.locX = this.spawnSpace - 1;
+                this.locY = playerY;
+            } else if (playerY == 1) {
+                this.locY = this.spawnSpace - 1;
+                this.locX = playerX;
+            }
+            
             if (this.cells[this.locX][this.locY] == null) {
                 this.player = true;
                 this.cells[this.locX][this.locY] = 0;
             }
             console.log("player check ran");
         }
+        
         for (var i = 0; i < this.gridSpace;) {
             for (var j = 0; j < this.gridSpace;) {
                 this.overworld[i][j] = this.cells[i][j];
@@ -331,10 +398,11 @@ app.main = {
     }
     , movePlayer: function (dir) {
         var moveParameters = [];
-        for (var i = 1; i < this.spawnSpace;) {
-            for (var j = 1; j < this.spawnSpace;) {
+        for (var i = 1; i < this.gridSpace;) {
+            for (var j = 1; j < this.gridSpace;) {
                 if (this.cells[i][j] == 0) {
                     moveParameters = this.canMove(i, j, dir);
+                    console.log(moveParameters);
                     this.executeMove(i, j, dir, moveParameters);
                     return;
                 }
@@ -382,6 +450,8 @@ app.main = {
             switch (movingBlock) {
             case 0:
                 moveData[1] = "player";
+                this.pLocX = i;
+                this.pLocY = j;
                 break;
             case 3:
                 moveData[1] = "enemy";
@@ -548,9 +618,14 @@ app.main = {
                 }
                 this.sound.playEffect(0);
             }
-            else if (moveData[1] == "player" && moveData[2] == "land", "border", "dungeon") {
+            else if (moveData[1] == "player" && moveData[2] == "land" || moveData[2] == "dungeon") {
                 this.sound.playEffect(1);
+                console.log("wtf");
+            } else if (moveData[1] == "player" && moveData[2] == "border") {
+                this.generateOverworld(this.pLocX, this.pLocY);
+                console.log("hit border, generate new islands");
             }
+            console.log(this.pLocX + "," + this.pLocY);
         }
     }
     , attackBlock: function () {
@@ -700,7 +775,7 @@ app.main = {
         this.score = 0;
         this.health = this.PLAYER.HEALTH;
         
-        this.generateOverworld();
+        this.generateOverworld(null, null);
         
         this.sound.playBGAudio(1);
         

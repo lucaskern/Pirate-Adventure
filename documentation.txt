@@ -8,7 +8,7 @@ COMPLETED
 COMPLETED
 2. Restrict movement to ground tiles and objects
 
-
+NOT NEEDED
 3. Add score counter
 	a. when all treasure is picked up, regenerate level
 
@@ -25,6 +25,11 @@ COMPLETED
     
 7. Show where enemy is going to move
     
+8. Change overworld generation from random to islands
+
+9. Add a store
+    a. Either floating and moving or on a land block
+    b. can upgrade pickax, health, and ship models
 
 INDEX
 
