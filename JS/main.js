@@ -14,7 +14,7 @@ app.main = {
     , score: 0
     , alive : true
     , health: undefined
-    , picks: 2
+    , picks: 5
     , pLocX: undefined
     , pLocY: undefined
     , locX: undefined
@@ -24,13 +24,13 @@ app.main = {
     , cells: []
     , overworld: []
     , TILES: Object.freeze({
-        BOX_SIZE: 50
+        BOX_SIZE: 40
     })
     , OVERWORLD_TILES: Object.freeze({
         BG_COLOR: "lightblue"
         , LAND_COLOR: "green"
         , LAND_NUM: 5
-        , DUNGEON_NUM: 3
+        , DUNGEON_NUM: 5
     })
     , DUNGEON_TILES: Object.freeze({
         BOX_SIZE: 50
@@ -39,7 +39,7 @@ app.main = {
         , ENEMY_NUM: 3
     })
     , PLAYER: {
-        HEALTH: 1
+        HEALTH: 5
         , WALK: 1
         , DASH: 2
         , SIZE: 5
@@ -71,8 +71,8 @@ app.main = {
         this.effectAudio.volume = 0.3;
         var border = document.querySelector("#border");
         
-        var heartsMeter = document.querySelector("#hearts");
-        var pickMeter = document.querySelector("#picks");
+        var heartMeter = document.querySelector("#heartMeter");
+        var pickMeter = document.querySelector("#pickMeter");
         
         var stone = document.querySelector("#stone");
         var stoneBG = document.querySelector("#stoneBG");
@@ -112,17 +112,9 @@ app.main = {
         this.animationID = requestAnimationFrame(this.update.bind(this));
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
-        if (this.GAMESTATE == 0) {
-            this.titleScreen();
-        } else if (this.GAMESTATE == 4) {
-            this.gameOver();
-        }
-        else if (this.GAMESTATE == 1, 2) {
-            this.drawTiles();
-            fillText(this.ctx, "Score: " + this.score, 20, this.canvas.height - 15, "24pt  verdana", "#F00");
-            fillText(this.ctx, "Picks: " + this.picks, this.canvas.width / 3, this.canvas.height - 15, "24pt verdana", "#F00");
-            fillText(this.ctx, "Health: " + this.health, this.canvas.width - 200, this.canvas.height - 15, "24pt verdana", "#F00");
-            
+        this.drawGUI();
+        
+        if (this.GAMESTATE == 1, 2) {
             if (this.frameCounter % 50 == 0) {
                 this.moveEnemy();
             }
@@ -653,6 +645,7 @@ app.main = {
                         }
                         else if (this.cells[i][j - 1] == 0) {
                             this.health--;
+                            console.log("unknown damage ran");
                         }
                         else if (this.cells[i][j - 1] == 2 && this.GAMESTATE == 1) {
                             this.overworld[i][j - 1] = 5
@@ -670,6 +663,7 @@ app.main = {
                         }
                         else if (this.cells[i + 1][j] == 0) {
                             this.health--;
+                            console.log("unknown damage ran");
                         }
                         else if (this.cells[i + 1][j] == 2 && this.GAMESTATE == 1) {
                             this.overworld[i + 1][j] = 5
@@ -683,6 +677,7 @@ app.main = {
                         }
                         else if (this.cells[i][j + 1] == 0) {
                             this.health--;
+                            console.log("unknown damage ran");
                         }
                         else if (this.cells[i][j + 1] == 2 && this.GAMESTATE == 1) {
                             this.overworld[i][j + 1] = 5
@@ -696,6 +691,7 @@ app.main = {
                         }
                         else if (this.cells[i - 1][j] == 0) {
                             this.health--;
+                            console.log("unknown damage ran");
                         }
                         else if (this.cells[i - 1][j] == 2 && this.GAMESTATE == 1) {
                             this.overworld[i - 1][j] = 5
@@ -803,6 +799,55 @@ app.main = {
         
         this.blinkCount++;
     }
+    , inGame: function() {
+        this.drawTiles();
+            fillText(this.ctx, "Score: " + this.score, 20, this.canvas.height - 15, "24pt  verdana", "#F00");
+            //fillText(this.ctx, "Picks: " + this.picks, this.canvas.width / 3, this.canvas.height - 15, "24pt verdana", "#F00");
+            //fillText(this.ctx, "Health: " + this.health, this.canvas.width - 200, this.canvas.height - 15, "24pt verdana", "#F00");
+        
+                       //ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+            switch (this.health) {
+                case 0:
+                    this.ctx.drawImage(heartMeter, 0, 0, 0, 50, this.canvas.width - this.TILES.BOX_SIZE * 5, this.canvas.height - this.TILES.BOX_SIZE, this.TILES.BOX_SIZE * 0, this.TILES.BOX_SIZE);
+                    break;
+                case 1:
+                    this.ctx.drawImage(heartMeter, 0, 0, 50, 50, this.canvas.width - this.TILES.BOX_SIZE * 5, this.canvas.height - this.TILES.BOX_SIZE, this.TILES.BOX_SIZE * 1, this.TILES.BOX_SIZE);
+                    break;
+                case 2:
+                    this.ctx.drawImage(heartMeter, 0, 0, 100, 50, this.canvas.width - this.TILES.BOX_SIZE * 5, this.canvas.height - this.TILES.BOX_SIZE, this.TILES.BOX_SIZE * 2, this.TILES.BOX_SIZE);
+                    break;
+                case 3:
+                    this.ctx.drawImage(heartMeter, 0, 0, 150, 50, this.canvas.width - this.TILES.BOX_SIZE * 5, this.canvas.height - this.TILES.BOX_SIZE, this.TILES.BOX_SIZE * 3, this.TILES.BOX_SIZE);
+                    break;
+                case 4:
+                    this.ctx.drawImage(heartMeter, 0, 0, 200, 50, this.canvas.width - this.TILES.BOX_SIZE * 5, this.canvas.height - this.TILES.BOX_SIZE, this.TILES.BOX_SIZE * 4, this.TILES.BOX_SIZE);
+                    break;
+                case 5:
+                    this.ctx.drawImage(heartMeter, 0, 0, 250, 50, this.canvas.width - this.TILES.BOX_SIZE * 5, this.canvas.height - this.TILES.BOX_SIZE, this.TILES.BOX_SIZE * 5, this.TILES.BOX_SIZE);
+                    break;
+            }
+        
+        switch (this.picks) {
+                case 0:
+                    this.ctx.drawImage(pickMeter, 0, 0, 0, 50, 0, this.canvas.height - this.TILES.BOX_SIZE, this.TILES.BOX_SIZE * 0, this.TILES.BOX_SIZE);
+                    break;
+                case 1:
+                    this.ctx.drawImage(pickMeter, 0, 0, 50, 50, 0, this.canvas.height - this.TILES.BOX_SIZE, this.TILES.BOX_SIZE * 1, this.TILES.BOX_SIZE);
+                    break;
+                case 2:
+                    this.ctx.drawImage(pickMeter, 0, 0, 100, 50, 0, this.canvas.height - this.TILES.BOX_SIZE, this.TILES.BOX_SIZE * 2, this.TILES.BOX_SIZE);
+                    break;
+                case 3:
+                    this.ctx.drawImage(pickMeter, 0, 0, 150, 50, 0, this.canvas.height - this.TILES.BOX_SIZE, this.TILES.BOX_SIZE * 3, this.TILES.BOX_SIZE);
+                    break;
+                case 4:
+                    this.ctx.drawImage(pickMeter, 0, 0, 200, 50, 0, this.canvas.height - this.TILES.BOX_SIZE, this.TILES.BOX_SIZE * 4, this.TILES.BOX_SIZE);
+                    break;
+                case 5:
+                    this.ctx.drawImage(pickMeter, 0, 0, 250, 50, 0, this.canvas.height - this.TILES.BOX_SIZE, this.TILES.BOX_SIZE * 5, this.TILES.BOX_SIZE);
+                    break;
+            }
+    }
     , restart: function () {
         this.score = 0;
         this.health = this.PLAYER.HEALTH;
@@ -812,6 +857,21 @@ app.main = {
         this.sound.playBGAudio(1);
         
         this.GAMESTATE = 0;
+    }
+    , drawGUI: function () {
+        switch (this.GAMESTATE) {
+            case 0:
+                this.titleScreen();
+                break;
+            case 1:
+                this.inGame();
+            case 2:
+                this.inGame();
+                break;
+            case 4:
+                this.gameOver();
+                break;
+        }
     }
     , calculateDeltaTime: function () {
         var now, fps;
