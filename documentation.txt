@@ -25,11 +25,13 @@ NOT NEEDED
     
 7. Show where enemy is going to move
     
+//COMPLETED
 8. Change overworld generation from random to islands
 
 9. Add a store
     a. Either floating and moving or on a land block
     b. can upgrade pickax, health, and ship models
+
 
 INDEX
 

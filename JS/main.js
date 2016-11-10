@@ -14,6 +14,7 @@ app.main = {
     , score: 0
     , alive : true
     , health: undefined
+    , picks: 2
     , pLocX: undefined
     , pLocY: undefined
     , locX: undefined
@@ -38,7 +39,7 @@ app.main = {
         , ENEMY_NUM: 3
     })
     , PLAYER: {
-        HEALTH: 3
+        HEALTH: 1
         , WALK: 1
         , DASH: 2
         , SIZE: 5
@@ -54,6 +55,7 @@ app.main = {
         , DUNGEON: 2
         , PAUSE: 3
         , DEAD: 4
+        , SHOP: 5
     }
     , numBoxes: this.BLOCK_NUM
     , init: function () {
@@ -68,14 +70,26 @@ app.main = {
         this.effectAudio = document.querySelector("#effectAudio");
         this.effectAudio.volume = 0.3;
         var border = document.querySelector("#border");
+        
+        var heartsMeter = document.querySelector("#hearts");
+        var pickMeter = document.querySelector("#picks");
+        
         var stone = document.querySelector("#stone");
         var stoneBG = document.querySelector("#stoneBG");
         var playerUp = document.querySelector("#playerUp");
         var treasure = document.querySelector("#treasure");
         var enemy = document.querySelector('#enemy');
         var ladder = document.querySelector('ladder');
+        
         var water = document.querySelector("water");
         var redX = document.querySelector("redX");
+        var greenCheck = document.querySelector("greenCheck");
+        var land = document.querySelector("land");
+        var boatUp = document.querySelector("boatUp");
+        var boatRight = document.querySelector("boatRight");
+        var boatDown = document.querySelector("boatDown");
+        var boatLeft = document.querySelector("boatLeft");
+        
         this.health = this.PLAYER.HEALTH;
         this.pLocX = this.TILES.BOX_SIZE / 2;
         this.pLocY = this.TILES.BOX_SIZE / 2;
@@ -106,6 +120,7 @@ app.main = {
         else if (this.GAMESTATE == 1, 2) {
             this.drawTiles();
             fillText(this.ctx, "Score: " + this.score, 20, this.canvas.height - 15, "24pt  verdana", "#F00");
+            fillText(this.ctx, "Picks: " + this.picks, this.canvas.width / 3, this.canvas.height - 15, "24pt verdana", "#F00");
             fillText(this.ctx, "Health: " + this.health, this.canvas.width - 200, this.canvas.height - 15, "24pt verdana", "#F00");
             
             if (this.frameCounter % 50 == 0) {
@@ -310,24 +325,16 @@ app.main = {
                         //console.log(i + ',' + j);
                     }
                     else if (this.cells[i][j] == 1) {
-                        this.ctx.save();
-                        this.ctx.fillStyle = this.OVERWORLD_TILES.LAND_COLOR;
-                        this.ctx.fillRect(i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
-                        this.ctx.restore();
+                        this.ctx.drawImage(land, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
                     }
                     else if (this.cells[i][j] == 2) {
-                        this.ctx.save();
-                        this.ctx.fillStyle = this.OVERWORLD_TILES.LAND_COLOR;
-                        this.ctx.fillRect(i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
-                        this.ctx.restore();
+                        this.ctx.drawImage(land, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
                         this.ctx.drawImage(redX, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
                         // console.log("Gold ran");
                     }
                     else if (this.cells[i][j] == 5) {
-                        this.ctx.save();
-                        this.ctx.fillStyle = "black";
-                        this.ctx.fillRect(i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
-                        this.ctx.restore();
+                        this.ctx.drawImage(land, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
+                        this.ctx.drawImage(greenCheck, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
                     }
                     else if (this.cells[i][j] == 0) {
                         this.pLocX = i;
@@ -335,16 +342,16 @@ app.main = {
                         //console.log(player);
                         switch (this.playerDirection) {
                         case 0:
-                            this.ctx.drawImage(playerUp, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
+                            this.ctx.drawImage(boatUp, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
                             break;
                         case 1:
-                            this.ctx.drawImage(playerRight, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
+                            this.ctx.drawImage(boatRight, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
                             break;
                         case 2:
-                            this.ctx.drawImage(playerDown, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
+                            this.ctx.drawImage(boatDown, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
                             break;
                         case 3:
-                            this.ctx.drawImage(playerLeft, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
+                            this.ctx.drawImage(boatLeft, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
                             break;
                         }
                     }
@@ -639,6 +646,10 @@ app.main = {
                         if (this.cells[i][j - 1] == 3) {
                             this.cells[i][j - 1] = null;
                             this.sound.playEffect(3);
+                        } else if (this.picks > 0 && this.cells[i][j - 1] == 1) {
+                            this.picks--;
+                            this.cells[i][j - 1] = null;
+                            console.log("pick hit block");
                         }
                         else if (this.cells[i][j - 1] == 0) {
                             this.health--;
@@ -652,6 +663,10 @@ app.main = {
                         if (this.cells[i + 1][j] == 3) {
                             this.cells[i + 1][j] = null;
                             this.sound.playEffect(3);
+                        } else if (this.picks > 0 && this.cells[i + 1][j] == 1) {
+                            this.picks--;
+                            this.cells[i + 1][j] = null;
+                            console.log("pick hit block");
                         }
                         else if (this.cells[i + 1][j] == 0) {
                             this.health--;
@@ -659,7 +674,7 @@ app.main = {
                         else if (this.cells[i + 1][j] == 2 && this.GAMESTATE == 1) {
                             this.overworld[i + 1][j] = 5
                             this.enterDungeon();
-                        }
+                        } 
                         break;
                     case 2:
                         if (this.cells[i][j + 1] == 3) {
@@ -758,6 +773,19 @@ app.main = {
         this.blinkCount++;
     }
     , gameOver: function() {
+        var isOn = true;
+        
+        if (this.blinkCount < 60)
+        {
+            isOn = true;
+        }
+        else if(this.blinkCount < 120) 
+        {
+            isOn = false;
+        } else if (this.blinkCount > 120) {
+            this.blinkCount = 0;
+        }
+        
         this.ctx.save();
         this.ctx.textAlign = "center";
         this.ctx.fillStyle = "red";
@@ -767,9 +795,13 @@ app.main = {
         
         fillText(this.ctx, "You amassed a fortune of " + this.score + " pieces of gold!" , this.canvas.width / 2, this.canvas.height / 2, "bold 18pt courier", "black");
         
+        if(isOn)
+        {
         fillText(this.ctx, "Press Enter to Restart" , this.canvas.width / 2, this.canvas.height / 1.4, "bold 18pt courier", "black");
-        
+        }
         this.ctx.restore();
+        
+        this.blinkCount++;
     }
     , restart: function () {
         this.score = 0;
