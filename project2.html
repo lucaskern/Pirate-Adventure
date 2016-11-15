@@ -6,13 +6,24 @@
 	<style>
 		canvas 
         {
-            margin: 25px 20px;
+            margin: 0px auto;
             border: 2px solid black;
             display: block;
         }
         
         img {
-            
+            display: none;
+        }
+        
+        #audioControls {
+            display: none;
+        }
+        
+        #title {
+            text-align: center;
+            color: white;
+            font-size: 64px;
+            margin: 0px;
         }
         
         body {background-color: black;}
@@ -22,14 +33,17 @@
 	<title>Project 2</title>
 </head>
 <body>
+    <h1 id="title"> Pirate Adventure! </h1>
 	<canvas>
 		Get a real browser!
 	</canvas>
+    
 	<script src='JS/main.js'></script>
     <script src='JS/loader.js'></script>
     <script src='JS/utilities.js'></script>
     <script src='JS/keys.js'></script>
     <script src='JS/sound.js'></script>
+    <script src='JS/emitter.js'></script>
     
     <section id="audioControls">
         <audio id="bgAudio" controls loop></audio>
@@ -48,6 +62,7 @@
     <img id="treasure" src="Images/treasure.png">
     <img id="enemy" src="Images/enemy.png">
     <img id="ladder" src="Images/ladder.png">
+    <img id="coin" src="Images/coin.png">
     
     <img id="boatUp" src="Images/boatUp.png">
     <img id="boatRight" src="Images/boatRight.png">
@@ -57,6 +72,7 @@
     <img id="redX" src="Images/x.png">
     <img id="greenCheck" src="Images/check.png">
     <img id="land" src="Images/land.png">
+    <img id="shop" src="Images/shop.png">
     
 </body>
 </html>

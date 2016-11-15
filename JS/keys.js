@@ -33,12 +33,20 @@ window.addEventListener("keydown",function(e){
         return false;
     }
     
-    if(char == "t" || char == "T"){
-        app.main.generateTiles();
-    }
-    
-    if(char == "e" || char == "E"){
-        app.main.enterDungeon();
+    if(app.main.GAMESTATE == 5) {
+        
+        if(char == "h" || char == "H"){
+            app.main.buyItem("heart");
+        }
+        
+        if(char == "p" || char == "P"){
+            app.main.buyItem("pick");
+        }
+        
+        if(char == "e" || char == "E") {
+            app.main.GAMESTATE = 1;
+            app.main.sound.playBGAudio(1);
+        }
     }
     
     if(char == "f" || char == "F"){

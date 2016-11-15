@@ -1,37 +1,36 @@
-To Do/ Questions
-
-COMPLETED
-1. Generate tiles in one section, and draw in another
-    a. call generate once
-    b. call draw every frame
-
-COMPLETED
-2. Restrict movement to ground tiles and objects
-
-NOT NEEDED
-3. Add score counter
-	a. when all treasure is picked up, regenerate level
-
-4. Drill
-	a. allows one stone wall to be hit
-
-
-//COMPLETED
-5. Enemy
-	a. Simple enemy that moves in a random direction every couple of seconds
+1. 
+    The game is completely different than my original prototype, I wanted to go in a more opened ended route, and the infinite runner I made earlier was very one way.
+2.
+    Media: Multiple Bg loops, and different sound effects for different actions. Optimized to save space. Images are all edited in some way to fit the theme, or made by me.
+    Canvas movement and animation is applied where needed.
     
-6. Return an array of values from can move, that includes true or false, and the block to be hit
-    a. execute proper actions when certain blocks hit
+    Interaction: Easy to understand keyboard controls using a daemon.
     
-7. Show where enemy is going to move
+    Usability: Game has different states that all make sense, and the player will naturally flow between them. UI gives pertinent info and changes when needed. The shop will likely have buttons or be a tileset when I revamp it, but currently didnt want it.
     
-//COMPLETED
-8. Change overworld generation from random to islands
-
-9. Add a store
-    a. Either floating and moving or on a land block
-    b. can upgrade pickax, health, and ship models
-
+    Game Design: I will admit that in its current state the game isnt exactly "fun", but I wanted to go with a game that could be expanded up as I saw fit, and here I have done that with the style, gameplay, and the way it is coded. I can add new blocks, items, and screen with relative ease and hopefully eventually make a full fledged experience.
+    
+    Coding: Several algorithms for land, dungeon generation, and making and updating the grid, as well as entity movement parameter checking. These contribute to the ability to expand as much as I want with this game.
+    
+3.
+    After I switched from my original concept to this one things have gone pretty smoothly. The grid functionality, movement, and area generation all work basically how I went for now.
+    
+    One thing I messed up on was having a grid of single numbers, which limits the data I get from each cell. I would probably make them an array of values that describe the object if I could.
+    
+    I would add bombs, a gun weapon, different enemies and dungeon types, powerups and more. All of this I already have a rough outline for code wise, it is simply a lack of time that they are not in here now.
+    
+4.
+    ASSETS
+    Sounds - https://www.youtube.com/watch?v=FoTu7LWkma0
+    https://www.youtube.com/watch?v=DMMVTf_deUw
+    http://www.bfxr.net/
+    
+    Images - https://www.spriters-resource.com
+    http://polycount.com/discussion/123291/stylized-stone-floor-texture
+    http://www.iconshock.com/img_vista/FLAT/accounting/jpg/treasure_chest_icon.jpg
+    
+5.
+    Id grade myself a 9/10, even though as I said the game isnt the funnest thing in the world, I think I tried to give it a larger scope and I succeeded at basically everything I set out to do and that bodes well for this projects future as there are a lot more things I want to add.
 
 INDEX
 
@@ -49,6 +48,7 @@ null - water
 0 - player
 1 - land
 2 - dungeon
+4 - shop
 5 - closed dungeon
 
 SOUNDS

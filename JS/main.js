@@ -8,13 +8,16 @@ app.main = {
     , ctx: undefined
     , frameCounter: 0
     , blinkCount: 0
-    , sound: undefined
+    , paused: false
+    , sound: undefined //sound.js
+    , Emitter: undefined //emitter.js
     , player: false
     , playerDirection: 0
-    , score: 0
+    , score: 120
     , alive : true
     , health: undefined
     , picks: 5
+    , coinEmitter: undefined
     , pLocX: undefined
     , pLocY: undefined
     , locX: undefined
@@ -24,13 +27,14 @@ app.main = {
     , cells: []
     , overworld: []
     , TILES: Object.freeze({
-        BOX_SIZE: 40
+        BOX_SIZE: 50
     })
     , OVERWORLD_TILES: Object.freeze({
         BG_COLOR: "lightblue"
         , LAND_COLOR: "green"
         , LAND_NUM: 5
         , DUNGEON_NUM: 5
+        , SHOP_NUM: 1
     })
     , DUNGEON_TILES: Object.freeze({
         BOX_SIZE: 50
@@ -39,7 +43,7 @@ app.main = {
         , ENEMY_NUM: 3
     })
     , PLAYER: {
-        HEALTH: 5
+        HEALTH: 3
         , WALK: 1
         , DASH: 2
         , SIZE: 5
@@ -57,6 +61,10 @@ app.main = {
         , DEAD: 4
         , SHOP: 5
     }
+    , STORE: {
+          HEART: 60
+        , PICK: 40
+    }
     , numBoxes: this.BLOCK_NUM
     , init: function () {
         console.log("app.main.init() called");
@@ -69,18 +77,22 @@ app.main = {
         this.bgAudio.volume = 0.25;
         this.effectAudio = document.querySelector("#effectAudio");
         this.effectAudio.volume = 0.3;
+        
         var border = document.querySelector("#border");
         
         var heartMeter = document.querySelector("#heartMeter");
         var pickMeter = document.querySelector("#pickMeter");
         
+        //dungeon images
         var stone = document.querySelector("#stone");
         var stoneBG = document.querySelector("#stoneBG");
         var playerUp = document.querySelector("#playerUp");
         var treasure = document.querySelector("#treasure");
         var enemy = document.querySelector('#enemy');
         var ladder = document.querySelector('ladder');
+        var coin = document.querySelector('coin');
         
+        //overworld images
         var water = document.querySelector("water");
         var redX = document.querySelector("redX");
         var greenCheck = document.querySelector("greenCheck");
@@ -89,6 +101,25 @@ app.main = {
         var boatRight = document.querySelector("boatRight");
         var boatDown = document.querySelector("boatDown");
         var boatLeft = document.querySelector("boatLeft");
+        var shop = document.querySelector("shop");
+        
+        //death screen particles
+        this.coinEmitter=new this.Emitter();
+        this.coinEmitter.numParticles = 70;
+		this.coinEmitter.useCircles = false;
+		this.coinEmitter.useSquares = false;
+        this.coinEmitter.useImage = true;
+		this.coinEmitter.xRange = 421;
+		this.coinEmitter.yRange = 11;
+		this.coinEmitter.minXspeed = -1;
+		this.coinEmitter.maxXspeed = 1;
+		this.coinEmitter.minYspeed = -2;
+		this.coinEmitter.maxYspeed = -4;
+		this.coinEmitter.startRadius = 11;
+		this.coinEmitter.expansionRate = 2.3
+		this.coinEmitter.decayRate = 1.5;
+		this.coinEmitter.lifetime = 500;
+        this.coinEmitter.createParticles({x:this.canvas.width * 2,y:this.canvas.height});
         
         this.health = this.PLAYER.HEALTH;
         this.pLocX = this.TILES.BOX_SIZE / 2;
@@ -99,7 +130,7 @@ app.main = {
             this.cells[i] = [];
             this.overworld[i] = [];
         }
-        this.GAMESTATE = 1;
+        this.GAMESTATE = 0;
         console.log(this.spawnSpace);
         //this.numBoxes = this.TILES.BLOCK_NUM;
         this.generateOverworld(0, 0);
@@ -130,7 +161,6 @@ app.main = {
     }
     , generateOverworld: function (playerX, playerY) {
         this.player = false;
-        
         
         //clear cells array
         for (var i = 0; i < this.gridSpace;) {
@@ -210,6 +240,14 @@ app.main = {
             }
         }
         
+        for (var i = 0; i < this.OVERWORLD_TILES.SHOP_NUM; i++) {
+            this.locX = Math.floor(getRandom(1, this.spawnSpace));
+            this.locY = Math.floor(getRandom(1, this.spawnSpace));
+            if (this.cells[this.locX - 1][this.locY] == 1 || this.cells[this.locX + 1][this.locY] == 1 || this.cells[this.locX][this.locY - 1] == 1 || this.cells[this.locX][this.locY + 1] == 1) {
+                this.cells[this.locX][this.locY] = 4;
+            }
+        }
+        
         while (this.player == false) {
             this.locX = Math.floor(getRandom(1, this.spawnSpace));
             this.locY = Math.floor(getRandom(1, this.spawnSpace));
@@ -217,15 +255,19 @@ app.main = {
             if(playerX == this.spawnSpace - 1) {
                 this.locX = 1;
                 this.locY = playerY;
+                this.player = true;
             } else if (playerY == this.spawnSpace - 1) {
                 this.locY = 1;
                 this.locX = playerX;
+                this.player = true;
             } else if(playerX == 1) {
                 this.locX = this.spawnSpace - 1;
                 this.locY = playerY;
+                this.player = true;
             } else if (playerY == 1) {
                 this.locY = this.spawnSpace - 1;
                 this.locX = playerX;
+                this.player = true;
             }
             
             if (this.cells[this.locX][this.locY] == null) {
@@ -323,6 +365,10 @@ app.main = {
                         this.ctx.drawImage(land, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
                         this.ctx.drawImage(redX, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
                         // console.log("Gold ran");
+                    }  
+                    else if (this.cells[i][j] == 4) {
+                        this.ctx.drawImage(land, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
+                        this.ctx.drawImage(shop, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
                     }
                     else if (this.cells[i][j] == 5) {
                         this.ctx.drawImage(land, i * this.TILES.BOX_SIZE, j * this.TILES.BOX_SIZE, this.TILES.BOX_SIZE, this.TILES.BOX_SIZE);
@@ -468,6 +514,9 @@ app.main = {
                 break;
             case 3:
                 moveData[2] = "enemy";
+                break;
+            case 4:
+                moveData[2] = "shop";
                 break;
             case 5:
                 moveData[2] = "donegeon";
@@ -650,6 +699,8 @@ app.main = {
                         else if (this.cells[i][j - 1] == 2 && this.GAMESTATE == 1) {
                             this.overworld[i][j - 1] = 5
                             this.enterDungeon();
+                        } else if (this.cells[i][j - 1] == 4 && this.GAMESTATE == 1) {
+                            this.enterShop();
                         }
                         break;
                     case 1:
@@ -668,12 +719,18 @@ app.main = {
                         else if (this.cells[i + 1][j] == 2 && this.GAMESTATE == 1) {
                             this.overworld[i + 1][j] = 5
                             this.enterDungeon();
-                        } 
+                        } else if (this.cells[i + 1][j] == 4 && this.GAMESTATE == 1) {
+                            this.enterShop();
+                        }
                         break;
                     case 2:
                         if (this.cells[i][j + 1] == 3) {
                             this.cells[i][j + 1] = null;
                             this.sound.playEffect(3);
+                        } else if (this.picks > 0 && this.cells[i][j + 1] == 1) {
+                            this.picks--;
+                            this.cells[i][j + 1] = null;
+                            console.log("pick hit block");
                         }
                         else if (this.cells[i][j + 1] == 0) {
                             this.health--;
@@ -682,12 +739,18 @@ app.main = {
                         else if (this.cells[i][j + 1] == 2 && this.GAMESTATE == 1) {
                             this.overworld[i][j + 1] = 5
                             this.enterDungeon();
+                        } else if (this.cells[i][j + 1] == 4 && this.GAMESTATE == 1) {
+                            this.enterShop();
                         }
                         break;
                     case 3:
                         if (this.cells[i - 1][j] == 3) {
                             this.cells[i - 1][j] = null;
                             this.sound.playEffect(3);
+                        } else if (this.picks > 0 && this.cells[i - 1][j] == 1) {
+                            this.picks--;
+                            this.cells[i - 1][j] = null;
+                            console.log("pick hit block");
                         }
                         else if (this.cells[i - 1][j] == 0) {
                             this.health--;
@@ -696,6 +759,8 @@ app.main = {
                         else if (this.cells[i - 1][j] == 2 && this.GAMESTATE == 1) {
                             this.overworld[i - 1][j] = 5
                             this.enterDungeon();
+                        } else if (this.cells[i - 1][j] == 4 && this.GAMESTATE == 1) {
+                            this.enterShop();
                         }
                         break;
                     }
@@ -712,6 +777,12 @@ app.main = {
         
         this.sound.playBGAudio(2);
         console.log("enter dungeon");
+    }
+    , enterShop: function () {
+        this.GAMESTATE = 5;
+        
+        this.sound.playBGAudio(4);
+        console.log("enter shop");
     }
     , enterOverworld: function () {
         for (var i = 0; i < this.gridSpace;) {
@@ -759,6 +830,8 @@ app.main = {
         this.ctx.fillRect(0,0, this.canvas.width, this.canvas.height);
         fillText(this.ctx, "Pirate Adventure" , this.canvas.width / 2, this.canvas.height / 2, "50pt serif", "black");
         
+        fillText(this.ctx, "Created by Lucas Kern" , this.canvas.width / 2, this.canvas.height - 50, "bold 18pt courier", "black");
+        
         if(isOn)
         {
             fillText(this.ctx, "Press Enter to Begin" , this.canvas.width / 2, this.canvas.height / 1.7, "bold 18pt courier", "black");
@@ -798,14 +871,36 @@ app.main = {
         this.ctx.restore();
         
         this.blinkCount++;
+        
+        this.coinEmitter.updateAndDraw(this.ctx,{x:this.canvas.width / 2,y:this.canvas.height}, coin, 20, 20);
+    }
+    , pauseScreen: function() {
+        
+        this.ctx.save();
+        this.ctx.textAlign = "center";
+        this.ctx.fillStyle = "green";
+        
+        this.ctx.fillRect(0,0, this.canvas.width, this.canvas.height);
+        fillText(this.ctx, "Game Paused" , this.canvas.width / 2, this.canvas.height / 2, "50pt serif", "white");
+        
+        fillText(this.ctx, "Created by Lucas Kern" , this.canvas.width / 2, this.canvas.height - 50, "bold 18pt courier", "white");
+        
+        
+        this.ctx.restore();
+        
     }
     , inGame: function() {
         this.drawTiles();
-            fillText(this.ctx, "Score: " + this.score, 20, this.canvas.height - 15, "24pt  verdana", "#F00");
+        
+        this.drawStats();
+        
+    }
+    , drawStats: function () {
+        fillText(this.ctx, "Gold: " + this.score, 20, 30, "bold 24pt  verdana", "gold");
             //fillText(this.ctx, "Picks: " + this.picks, this.canvas.width / 3, this.canvas.height - 15, "24pt verdana", "#F00");
             //fillText(this.ctx, "Health: " + this.health, this.canvas.width - 200, this.canvas.height - 15, "24pt verdana", "#F00");
         
-                       //ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+            //ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
             switch (this.health) {
                 case 0:
                     this.ctx.drawImage(heartMeter, 0, 0, 0, 50, this.canvas.width - this.TILES.BOX_SIZE * 5, this.canvas.height - this.TILES.BOX_SIZE, this.TILES.BOX_SIZE * 0, this.TILES.BOX_SIZE);
@@ -848,6 +943,51 @@ app.main = {
                     break;
             }
     }
+    , shopScreen: function() {
+        this.ctx.save();
+        this.ctx.fillStyle = "tan";
+        this.ctx.fillRect(0,0,this.canvas.width, this.canvas.height);
+        this.ctx.restore();
+        
+        this.ctx.save();
+        this.ctx.textAlign = "center";
+        fillText(this.ctx, "Ye Olde Shoppe" , this.canvas.width / 2, this.canvas.height / 3, " bold 50pt serif", "black");
+        
+        this.ctx.textAlign = "left";
+        
+        fillText(this.ctx, "Press e to exit", this.canvas.width - this.TILES.BOX_SIZE * 4, 30, " bold 20pt sans-serif", "red");
+        
+        fillText(this.ctx, "Cost: " + this.STORE.PICK + ". Press p", this.canvas.width / 3, this.canvas.height / 1.7, " bold 40pt sans-serif", "black");
+        this.ctx.drawImage(pickMeter, 0, 0, 50, 50, 100, this.canvas.height / 2, this.TILES.BOX_SIZE * 2, this.TILES.BOX_SIZE * 2);
+        
+        fillText(this.ctx, "Cost: " + this.STORE.HEART + ". Press h" , this.canvas.width / 3, this.canvas.height / 1.3, " bold 40pt sans-serif", "black");
+        this.ctx.drawImage(heartMeter, 0, 0, 50, 50, 100, this.canvas.height / 1.5, this.TILES.BOX_SIZE * 2, this.TILES.BOX_SIZE * 2);
+        
+        
+        this.ctx.restore();
+        
+        this.drawStats();
+    }
+    , buyItem: function (itemName) {
+        switch(itemName) {
+            case "heart":
+                if (this.score >= this.STORE.HEART && this.health <= 5) {
+                    this.score = this.score - this.STORE.HEART
+                    this.health++;
+                } else {
+                    //cant buy
+                }
+                break;
+                case "pick":
+                if (this.score >= this.STORE.PICK && this.picks <= 5) {
+                    this.score = this.score - this.STORE.PICK
+                    this.picks++;
+                } else {
+                    //cant buy
+                }
+                break;
+        }
+    }
     , restart: function () {
         this.score = 0;
         this.health = this.PLAYER.HEALTH;
@@ -871,7 +1011,49 @@ app.main = {
             case 4:
                 this.gameOver();
                 break;
+            case 5:
+                this.shopScreen();
+                break;
         }
+        
+        if(this.paused) {
+            this.pauseScreen();
+        }
+    }
+    , pauseGame: function () {
+        this.sound.stopBGAudio();
+        
+        this.paused = true;
+        
+        //stop animation loop
+        cancelAnimationFrame(this.animationID);
+        
+        //update once more to draw pause screen
+        this.update();
+        
+    }
+    , resumeGame: function () {
+        cancelAnimationFrame(this.animationID);
+        
+        this.paused = false;
+        
+        this.update();
+        
+        switch (this.GAMESTATE) {
+            case 0:
+                this.sound.playBGAudio(2);
+                break;
+            case 1:
+                this.sound.playBGAudio(1);
+                break;
+            case 2:
+                this.sound.playBGAudio(2);
+                break;
+            case 5:
+                this.sound.playBGAudio(4);
+                break;
+        }
+        
     }
     , calculateDeltaTime: function () {
         var now, fps;
