@@ -16,7 +16,7 @@ app.main = {
     , score: 120
     , alive : true
     , health: undefined
-    , picks: 5
+    , picks: 3
     , coinEmitter: undefined
     , pLocX: undefined
     , pLocY: undefined
